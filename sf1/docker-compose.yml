@@ -1,0 +1,97 @@
+version: "3.9"
+
+services:
+  mongodb1:
+    image: mongo:7
+    container_name: sf1_mongo1
+    command: ["mongod", "--replSet", "rs0", "--bind_ip_all", "--port", "27017"]
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./mongo-data/mongo1:/data/db
+    networks:
+      - sf1_net
+
+  mongodb2:
+    image: mongo:7
+    container_name: sf1_mongo2
+    command: ["mongod", "--replSet", "rs0", "--bind_ip_all", "--port", "27018"]
+    ports:
+      - "27018:27018"
+    volumes:
+      - ./mongo-data/mongo2:/data/db
+    networks:
+      - sf1_net
+
+  mongodb3:
+    image: mongo:7
+    container_name: sf1_mongo3
+    command: ["mongod", "--replSet", "rs0", "--bind_ip_all", "--port", "27019"]
+    ports:
+      - "27019:27019"
+    volumes:
+      - ./mongo-data/mongo3:/data/db
+    networks:
+      - sf1_net
+
+  mongo-setup:
+    image: mongo:7
+    container_name: sf1_mongo_setup
+    depends_on:
+      - mongodb1
+      - mongodb2
+      - mongodb3
+    networks:
+      - sf1_net
+    restart: "no"
+    entrypoint: ["bash", "-lc"]
+    command: >-
+      "until mongosh --quiet --host mongodb1 --port 27017 --eval 'db.runCommand({ ping: 1 })' ; do echo waiting for mongo1 && sleep 2 ; done &&
+       until mongosh --quiet --host mongodb2 --port 27018 --eval 'db.runCommand({ ping: 1 })' ; do echo waiting for mongo2 && sleep 2 ; done &&
+       until mongosh --quiet --host mongodb3 --port 27019 --eval 'db.runCommand({ ping: 1 })' ; do echo waiting for mongo3 && sleep 2 ; done &&
+       mongosh --quiet --host mongodb1 --port 27017 --eval '
+         rs.initiate({
+           _id: "rs0",
+           members: [
+             { _id: 0, host: "mongodb1:27017" },
+             { _id: 1, host: "mongodb2:27018" },
+             { _id: 2, host: "mongodb3:27019" }
+           ]
+         });
+         let cfg = rs.conf();
+         cfg.members[0].priority = 2;
+         rs.reconfig(cfg, { force: true });
+         while(true){
+           let s = rs.status();
+           if(s.members && s.members[0] && s.members[0].stateStr === "PRIMARY"){ break; }
+           sleep(1000);
+         }
+       '"
+
+  backend:
+    build:
+      context: .
+      target: backend
+    env_file:
+      - .env
+    depends_on:
+      - mongodb1
+    ports:
+      - "4000:4000"
+    networks:
+      - sf1_net
+
+  frontend:
+    build:
+      context: .
+      target: frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    networks:
+      - sf1_net
+
+networks:
+  sf1_net:
+    driver: bridge

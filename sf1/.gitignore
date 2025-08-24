@@ -1,0 +1,14 @@
+node_modules
+.env
+.env.local
+.env.production
+.env.development
+.next
+dist
+coverage
+logs
+*.log
+pnpm-lock.yaml
+docker-data
+mongo-data
+tmp
