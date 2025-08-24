@@ -1,0 +1,37 @@
+{
+  "name": "sf1-monorepo",
+  "version": "1.0.0",
+  "description": "SF-1 Ultra-complex full-stack application",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "pnpm run dev:backend & pnpm run dev:frontend",
+    "dev:backend": "pnpm --filter backend dev",
+    "dev:frontend": "pnpm --filter frontend dev",
+    "build": "pnpm run build:backend && pnpm run build:frontend",
+    "build:backend": "pnpm --filter backend build",
+    "build:frontend": "pnpm --filter frontend build",
+    "test": "pnpm run test:backend && pnpm run test:frontend",
+    "test:backend": "pnpm --filter backend test",
+    "test:frontend": "pnpm --filter frontend test",
+    "lint": "pnpm --filter backend lint && pnpm --filter frontend lint",
+    "docker:build": "docker-compose build",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.2",
+    "prettier": "^3.1.0",
+    "eslint": "^8.55.0",
+    "@typescript-eslint/eslint-plugin": "^6.13.1",
+    "@typescript-eslint/parser": "^6.13.1"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=8.0.0"
+  }
+}
