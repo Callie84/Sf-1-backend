@@ -1,0 +1,13 @@
+node_modules
+dist
+.next
+.git
+.gitignore
+pnpm-lock.yaml
+coverage
+logs
+docker-data
+mongo-data
+tmp
+**/.DS_Store
+**/Thumbs.db
