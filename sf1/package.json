@@ -1,6 +1,6 @@
 {
   "name": "sf1",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "SF-1 Ultra Master System - Complete full-stack application with 40+ modules",
   "private": true,
   "scripts": {
