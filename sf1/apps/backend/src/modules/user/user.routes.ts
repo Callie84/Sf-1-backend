@@ -233,7 +233,7 @@ router.patch(
 );
 
 // Admin-only routes
-router.use('/admin', authenticate, requireRole([UserRole.ADMIN]));
+router.use('/admin', apiLimiter, authenticate, requireRole([UserRole.ADMIN]));
 
 /**
  * @route   GET /api/users/admin/analytics
